@@ -42,9 +42,9 @@ function Dashboard() {
     setSessionRequests(
       parseInt(sessionRequests) + parseInt(currentRequestSize)
     );
-    setTotalRequestSize(
-      parseInt(totalRequestSize) + parseInt(currentRequestSize)
-    );
+    // setTotalRequestSize(
+    //   parseInt(totalRequestSize) + parseInt(currentRequestSize)
+    // );
   }, [currentRequestSize]);
 
   //   useEffect(async () => {
@@ -63,7 +63,7 @@ function Dashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [currentRequestSize]);
 
   const sendRequestToDB = async (requestSize) => {
     console.log(requestSize);
@@ -90,21 +90,18 @@ function Dashboard() {
       console.log(query);
       const result = await fetch(
         `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${query}&api-key=${API_KEY}`
-      );
-      let jsonResult = await result.json();
-      console.log(jsonResult);
-      setCurrentRequestSize(result.headers.get('content-length'));
-      console.log(currentRequestSize);
-      sendRequestToDB(currentRequestSize);
+      )
+        .then(() => {
+          setCurrentRequestSize(result.headers.get('content-length'));
+        })
+        .then(() => {
+          console.log(currentRequestSize);
+          sendRequestToDB(currentRequestSize);
+        });
       setArticles(jsonResult.response.docs);
-      //   setSessionRequests(
-      //     parseInt(sessionRequests) + parseInt(currentRequestSize)
-      //   );
     } catch (error) {
       console.error('Error:', error);
     }
-    // console.log(currentRequestSize);
-
     return articles;
   };
 
