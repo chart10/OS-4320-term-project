@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS trafficData;
+
+CREATE TABLE trafficData (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    time_sent TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    packet_description TEXT,
+    size INTEGER NOT NULL
+);
