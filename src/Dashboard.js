@@ -42,9 +42,7 @@ function Dashboard() {
     setSessionRequests(
       parseInt(sessionRequests) + parseInt(currentRequestSize)
     );
-    // setTotalRequestSize(
-    //   parseInt(totalRequestSize) + parseInt(currentRequestSize)
-    // );
+    sendRequestToDB(currentRequestSize);
   }, [currentRequestSize]);
 
   //   useEffect(async () => {
@@ -87,21 +85,17 @@ function Dashboard() {
   const articleSearch = async () => {
     try {
       const API_KEY = process.env.REACT_APP_NYT_API_KEY;
-      console.log(query);
       const result = await fetch(
         `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${query}&api-key=${API_KEY}`
-      )
-        .then(() => {
-          setCurrentRequestSize(result.headers.get('content-length'));
-        })
-        .then(() => {
-          console.log(currentRequestSize);
-          sendRequestToDB(currentRequestSize);
-        });
+      );
+      let jsonResult = await result.json();
+      setCurrentRequestSize(result.headers.get('content-length'));
+      console.log(currentRequestSize);
       setArticles(jsonResult.response.docs);
     } catch (error) {
       console.error('Error:', error);
     }
+    // sendRequestToDB(currentRequestSize);
     return articles;
   };
 

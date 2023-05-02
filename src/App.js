@@ -32,12 +32,6 @@ function App() {
               <h6>Python Flask</h6>
             </div>
           </a>
-          <a href='https://www.wireshark.org/'>
-            <div className='tech-item'>
-              <img src={wireshark} className='App-logo' alt='Wireshark logo' />
-              <h6>WireShark</h6>
-            </div>
-          </a>
           <a href='https://www.mysql.com/'>
             <div className='tech-item'>
               <img src={mysql} className='App-logo' alt='SQLite logo' />
