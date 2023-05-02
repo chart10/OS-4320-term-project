@@ -8,18 +8,24 @@ function Dashboard() {
   const [articles, setArticles] = useState(null);
   const [query, setQuery] = useState('');
   const [currentRequestSize, setCurrentRequestSize] = useState(0);
-  const [totalRequests, setTotalRequests] = useState(0);
+  const [sessionRequests, setSessionRequests] = useState(0);
+  const [totalRequestSize, setTotalRequestSize] = useState(0);
   const [currentTime, setCurrentTime] = useState('--');
 
   useEffect(() => {
     try {
       fetch('/time')
-        .then((res) => res.json())
+        .then((res) => {
+          const contentLength = res.headers.get('content-length');
+          setCurrentRequestSize(contentLength);
+          return res.json();
+        })
         .then((data) => {
           setCurrentTime(data.time);
           //   setCurrentRequestSize(data.headers.get('content-length'));
           //   console.log(currentRequestSize);
         });
+
       //   console.log(currentTime);
     } catch (error) {
       console.error('Error:', error);
@@ -32,12 +38,49 @@ function Dashboard() {
     displayArticles(articles);
   }, [articles]);
 
-  const sendRequestToDB = async () => {
-    const request = { packetSize: currentRequestSize };
-    const response = await fetch('/send_to_db', {
-      method: 'POST',
-      body: JSON.stringify(request),
-    });
+  useEffect(() => {
+    setSessionRequests(
+      parseInt(sessionRequests) + parseInt(currentRequestSize)
+    );
+    setTotalRequestSize(
+      parseInt(totalRequestSize) + parseInt(currentRequestSize)
+    );
+  }, [currentRequestSize]);
+
+  //   useEffect(async () => {
+  //     const result = await fetch('/requests_to_date');
+  //     setTotalRequestSize(result.json());
+  //   }, [currentRequestSize]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/requests_to_date');
+        const data = await response.json();
+        setTotalRequestSize(data[0]);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const sendRequestToDB = async (requestSize) => {
+    console.log(requestSize);
+    try {
+      const request = { packetSize: requestSize };
+      const response = await fetch('/send_to_db', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+      const data = await response.json();
+      console.log('Response data:', data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   // This function makes a fetch request to NYT article search REST API
@@ -51,11 +94,16 @@ function Dashboard() {
       let jsonResult = await result.json();
       console.log(jsonResult);
       setCurrentRequestSize(result.headers.get('content-length'));
-      //   console.log(currentRequestSize);
+      console.log(currentRequestSize);
+      sendRequestToDB(currentRequestSize);
       setArticles(jsonResult.response.docs);
+      //   setSessionRequests(
+      //     parseInt(sessionRequests) + parseInt(currentRequestSize)
+      //   );
     } catch (error) {
       console.error('Error:', error);
     }
+    // console.log(currentRequestSize);
 
     return articles;
   };
@@ -63,7 +111,11 @@ function Dashboard() {
   // This function renders the article headlines from the articleSearch output
   const displayArticles = (articles) => {
     if (articles == null) return <p>No articles found</p>;
-    return articles.map((doc) => <h3 key={doc._id}>{doc.headline.main}</h3>);
+    return articles.map((doc) => (
+      <a href={doc.web_url} key={doc._id}>
+        <h3>{doc.headline.main}</h3>
+      </a>
+    ));
   };
 
   return (
@@ -72,11 +124,8 @@ function Dashboard() {
       <div className='time'>
         <p>The current time is: {currentTime}</p>
       </div>
-      <div className='requestHistory'>
-        <h3>Data Usage to date</h3>
-      </div>
       <div className='currentRequest'>
-        <h3>Most recent request:</h3>
+        <h3>Most recent request: </h3>
         {currentRequestSize <= 0 ? (
           <p>--</p>
         ) : (
@@ -85,6 +134,24 @@ function Dashboard() {
             <p>{currentRequestSize / 1000000} megabytes</p>
           </div>
         )}
+      </div>
+      <div className='sessionHistory'>
+        <h3>Data Usage of current session: </h3>
+        {sessionRequests <= 0 ? (
+          <p>--</p>
+        ) : (
+          <div>
+            <p>{sessionRequests} bytes</p>
+            <p>{sessionRequests / 1000000} megabytes</p>
+          </div>
+        )}
+      </div>
+      <div className='totalHistory'>
+        <h3>Data Usage to date: </h3>
+        <div>
+          <p>{totalRequestSize} bytes</p>
+          <p>{totalRequestSize / 1000000} megabytes</p>
+        </div>
       </div>
       <div className='nytSearch'>
         <p>

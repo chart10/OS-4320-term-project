@@ -1,7 +1,7 @@
 import logo from './assets/react-logo.jpg';
 import wireshark from './assets/wireshark.png';
 import flyio from './assets/flyio-logo.jpg';
-import sqlite from './assets/sqlite-logo.jpg';
+import mysql from './assets/mysql-logo.png';
 import flask from './assets/flask-logo.png';
 import Dashboard from './Dashboard.js';
 import React from 'react';
@@ -38,10 +38,10 @@ function App() {
               <h6>WireShark</h6>
             </div>
           </a>
-          <a href='https://sqlite.org/index.html'>
+          <a href='https://www.mysql.com/'>
             <div className='tech-item'>
-              <img src={sqlite} className='App-logo' alt='SQLite logo' />
-              <h6>SQLite</h6>
+              <img src={mysql} className='App-logo' alt='SQLite logo' />
+              <h6>MySQL</h6>
             </div>
           </a>
           <a href='https://fly.io/'>

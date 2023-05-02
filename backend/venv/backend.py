@@ -1,41 +1,48 @@
 import time
-import socket
-import sqlite3
+import os
+from flask_mysqldb import MySQL
+# import MySQLdb.cursors
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
+mysql = MySQL(app)
 
-def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
 
-@app.route('/get_database_rows')
-def get_database_rows():
-    conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM trafficData').fetchall()
-    posts = [dict(row) for row in rows]
+@app.route('/fetch_db')
+def fetch_db():
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM requestsToDate')
+    rows = cursor.fetchall()
+    cursor.close()
+    return jsonify(rows)
 
-    print(posts)
-    conn.close()
-    return jsonify(posts)
-
-@app.route('/time')
-def get_current_time():
-    print("hello")
-    current_time = time.strftime("%I:%M %p")
-    return {'time': current_time}
+@app.route('/requests_to_date')
+def requests_to_date():
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT SUM(size) FROM requestsToDate')
+    result = cursor.fetchone()
+    return jsonify(result)
 
 @app.route('/send_to_db', methods=['POST'])
 def send_to_db():
     print("sending to database")
     packet_size = request.json["packetSize"]
     print(packet_size)
-    conn = get_db_connection()
-    conn.execute('INSERT INTO trafficData (size) VALUES (?)', (packet_size,))
-    conn.commit()
-    return "Successfully posted to database"
+    cursor = mysql.connection.cursor()
+    cursor.execute('INSERT INTO requestsToDate (size) VALUES (%s)', (packet_size,))
+    cursor.connection.commit()
+    cursor.close()
+    return jsonify("Successfully posted to database")
 
+@app.route('/time')
+def get_current_time():
+    print("fetching current time")
+    current_time = time.strftime("%I:%M %p")
+    return {'time': current_time}
 
 
 # @app.route('/socket_test')
