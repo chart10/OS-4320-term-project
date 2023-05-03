@@ -1,5 +1,4 @@
 import logo from './assets/react-logo.jpg';
-import wireshark from './assets/wireshark.png';
 import flyio from './assets/flyio-logo.jpg';
 import mysql from './assets/mysql-logo.png';
 import flask from './assets/flask-logo.png';
