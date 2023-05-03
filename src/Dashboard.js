@@ -16,11 +16,12 @@ function Dashboard() {
     try {
       fetch('/time')
         .then((res) => {
-          const contentLength = res.headers.get('content-length');
-          setCurrentRequestSize(contentLength);
+          //   const contentLength = res.headers.get('content-length');
           return res.json();
         })
         .then((data) => {
+          console.log(JSON.stringify(data).length);
+          setCurrentRequestSize(JSON.stringify(data).length);
           setCurrentTime(data.time);
           //   setCurrentRequestSize(data.headers.get('content-length'));
           //   console.log(currentRequestSize);
@@ -89,7 +90,7 @@ function Dashboard() {
         `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${query}&api-key=${API_KEY}`
       );
       let jsonResult = await result.json();
-      setCurrentRequestSize(result.headers.get('content-length'));
+      setCurrentRequestSize(JSON.stringify(jsonResult).length);
       console.log(currentRequestSize);
       setArticles(jsonResult.response.docs);
     } catch (error) {

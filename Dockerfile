@@ -9,16 +9,16 @@ RUN apt-get install -y default-libmysqlclient-dev
 
 WORKDIR /python-docker
 
-COPY api/requirements.txt requirements.txt
+COPY backend/requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-COPY api .
+COPY backend .
 COPY .env .env
 
 # RUN python -m venv venv
 # RUN source venv/bin/activate
 
-ENV FLASK_APP=api
+ENV FLASK_APP=backend
 
 CMD ["python", "-m" , "flask", "run", "--host=0.0.0.0"]
 
